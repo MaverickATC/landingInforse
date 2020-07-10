@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import emailjs from 'emailjs-com';
 import styled from 'styled-components';
 
 const MainContainer = styled.div`
+  z-index: 1000;
 `;
 
 const LogoImgBox = styled.img`
@@ -10,7 +13,7 @@ const LogoImgBox = styled.img`
   left: 46px;
 `;
 
-const CrossIconBox = styled.a`
+const CrossIconBox = styled.div`
   position: absolute;
   top: 49px;
   right: 49px;
@@ -28,7 +31,7 @@ const ContentWrapper = styled.div`
 const FormContainerWrapper = styled.div`
 `;
 
-const FormContainer = styled.div`
+const FormContainer = styled.form`
   width: 70%;
   display: flex;
   flex-direction: column;
@@ -84,7 +87,7 @@ const InputItemIcon = styled.img`
   margin: 0 30px 0 auto;
 `;
 
-const Button = styled.div`
+const Button = styled.button`
   width: fit-content;
   font-size: 18px;
   line-height: 17px;
@@ -153,34 +156,72 @@ const crossIcon = require('../../assets/images/icon_cross.png');
 const userIcon = require('../../assets/images/icon_user_black.svg');
 const emailIcon = require('../../assets/images/icon_email_black.svg');
 
-function LetsTalk() {
+function LetsTalk(props) {
   const [isSuccessful, setIsSuccessful] = useState(false);
+
+  //mail send
+  const sendHandler = (name, contactNumber) => {
+    const templateParams = {
+      "name": name,
+      "contact": contactNumber
+    }
+
+    emailjs.send('default_service', 'template_JuSrrHAw', templateParams, 'user_HuJgJTYaS22UkmTiUftN0')
+      .then(function (response) {
+        console.log('SUCCESS!', response.status, response.text);
+        setIsSuccessful(true);
+      }, function (error) {
+        console.log('FAILED...', error);
+      });
+  }
+  // form validation
+  const { register, handleSubmit, reset } = useForm();
+
+  const onSubmit = data => {
+    const inputData = { ...data };
+    sendHandler(inputData.name, inputData.contactNumber)
+    reset({
+      touched: false
+    });
+  }
 
   return (
     <MainContainer className='lets_talk_page'>
       <LogoImgBox src={LogoImg} alt={'logo'} />
-      <CrossIconBox href={'/'}>
+      <CrossIconBox onClick={props.click} >
         <img src={crossIcon} alt={'cross'} />
       </CrossIconBox>
-      
+
       <ContentWrapper>
-        {!isSuccessful ? 
-          (<FormContainerWrapper>
+        {!isSuccessful ?
+          (<FormContainerWrapper style={{marginTop: '3rem'}}>
             <MediumTextBox>Got a project in mind?</MediumTextBox>
             <BigTextBox>Get free expert advice</BigTextBox>
 
-            <FormContainer>
+            <FormContainer noValidate onSubmit={handleSubmit(onSubmit)}>
               <InputItemContainer>
-                <InputItem placeholder={'Username'} />
+                <InputItem
+                  placeholder={'Name'}
+                  name="name"
+                  ref={register({
+                    required: true
+                  })}
+                />
                 <InputItemIcon src={userIcon} alt={'user'} />
               </InputItemContainer>
 
               <InputItemContainer>
-                <InputItem placeholder={'Skype/Whatsapp/E-mail'} />
+                <InputItem
+                  placeholder={'Skype/Whatsapp/E-mail'}
+                  name="contactNumber"
+                  ref={register({
+                    required: true
+                  })}
+                />
                 <InputItemIcon src={emailIcon} alt={'email'} />
               </InputItemContainer>
-              
-              <Button onClick={() => setIsSuccessful(true)}>Let's talk</Button>
+
+              <Button type="submit">Let's talk</Button>
             </FormContainer>
           </FormContainerWrapper>) : (
             <BigTextBox underline style={{ width: 566 }}>We are going to contact you very soon.</BigTextBox>

@@ -1,7 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { Element } from 'react-scroll';
 import styled from 'styled-components';
 import Slider from 'react-slick';
+import { useForm } from 'react-hook-form'
+import emailjs from 'emailjs-com';
 import Header from '../Header/Header';
+import { Modal } from '../Modal/Modal';
 
 const BannerSection = styled.div`
   position: relative;
@@ -117,8 +121,22 @@ const BannerTextNormal = styled.div`
   }
 `;
 
-const Button = styled.a`
+const ModalButton = styled.button`
   width: fit-content;
+  font-size: 18px;
+  line-height: 17px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #f2f2f2;
+  padding: 23px 72px 20px;
+  background: linear-gradient(90deg, #B71E32 0%, #202020 102%);
+  border-radius: 8px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+`;
+
+const SendButton = styled.button`
+width: fit-content;
   font-size: 18px;
   line-height: 17px;
   text-transform: uppercase;
@@ -403,7 +421,7 @@ const Row = styled.div`
   }
 `;
 
-const FormContainer = styled.div`
+const FormContainer = styled.form`
   height: calc(100% - 100px);
   display: flex;
   flex-direction: column;
@@ -487,9 +505,6 @@ const whatsappIcon = require('../../assets/images/social_whatsapp.svg');
 const slideImage1 = require('../../assets/images/slide_project1.png');
 const slideImage2 = require('../../assets/images/slide_project2.png');
 const slideImage3 = require('../../assets/images/slide_project3.png');
-const slideImage4 = require('../../assets/images/slide_project1.png');
-const slideImage5 = require('../../assets/images/slide_project2.png');
-const slideImage6 = require('../../assets/images/slide_project3.png');
 const arrowIcon = require('../../assets/images/icon_arrow_right.png');
 
 function Home() {
@@ -572,29 +587,43 @@ function Home() {
 
   const sliderSettings = {
     arrows: false,
-    centerMode: true,
+    centerMode: false,
     dots: false,
     infinite: false,
     slidesToShow: 3,
+    initialSlide: 1,
     responsive: [
       {
         breakpoint: 1024,
         settings: {
           arrows: false,
-          centerMode: true,
+          centerMode: false,
           dots: false,
           infinite: false,
-          slidesToShow: 2,
+          slidesToShow: 3,
+          initialSlide: 1,
         }
       },
       {
         breakpoint: 768,
         settings: {
           arrows: false,
+          centerMode: false,
+          dots: false,
+          infinite: false,
+          slidesToShow: 2,
+          initialSlide: 0,
+        }
+      },
+      {
+        breakpoint: 576,
+        settings: {
+          arrows: false,
           centerMode: true,
           dots: false,
           infinite: false,
           slidesToShow: 1,
+          initialSlide: 0,
         }
       }
     ]
@@ -602,81 +631,122 @@ function Home() {
 
   let sliderRef = useRef();
 
+  //state to show modal
+  const [modalShow, setModalShow] = useState(false);
+
+  const toggleModal = () => {
+    const newState = !modalShow;
+    setModalShow(newState);
+  }
+
+  //mail send
+  const sendHandler = (name, contactNumber) => {
+    const templateParams = {
+      "name": name,
+      "contact": contactNumber
+    }
+
+    emailjs.send('default_service', 'template_JuSrrHAw', templateParams, 'user_HuJgJTYaS22UkmTiUftN0')
+      .then(function (response) {
+        console.log('SUCCESS!', response.status, response.text);
+        alert('Your message sent')
+      }, function (error) {
+        console.log('FAILED...', error);
+      });
+  }
+  // form validation
+  const { register, handleSubmit, reset } = useForm();
+
+  const onSubmit = data => {
+    const inputData = { ...data };
+    sendHandler(inputData.name, inputData.contactNumber)
+    reset({
+      touched: false
+    });
+  }
+
   return (
     <>
-      <Header />
+      {modalShow ? (<Modal show={modalShow} click={toggleModal}/>):
+      (<>
+      <Header click={toggleModal}/>
       <div className='home'>
         <BannerBackgroundImg src={bannerBgImg} alt={'banner'} />
         <BannerSection>
           <BannerContent>
             <BannerTextBig>Nunc euismod facilisi volutpat, amet.</BannerTextBig>
             <BannerTextNormal>Faucibus feugiat proin odio vel pharetra ullamcorper ultrices mauris, ut. Elementum.</BannerTextNormal>
-            <Button href='/lets_talk'>Let's talk</Button>
+            <ModalButton onClick={toggleModal}>Let's talk</ModalButton>
           </BannerContent>
 
           <BannerPhoneImg1 src={bannerPhoneImg1} alt={'phone1'} />
           <BannerPhoneImg2 src={bannerPhoneImg2} alt={'phone2'} />
         </BannerSection>
 
-        <Section className='who-we-are'>
-          <CaptionText>Who we are.</CaptionText>
-          <BoxContainer className='who-we-are-content'>
-            {who_we_are_data.map((dataItem, index) => {
-              return (
-                <Box className='box' key={index}>
-                  <img src={dataItem.icon} alt={dataItem.title} />
-                  <BoxTitle>{dataItem.title}</BoxTitle>
-                  <BoxDespText>{dataItem.desp}</BoxDespText>
-                </Box>
-              );
-            })}
-          </BoxContainer>
-        </Section>
+        <Element name='about'>
+          <Section className='who-we-are' id="1">
+            <CaptionText>Who we are.</CaptionText>
+            <BoxContainer className='who-we-are-content'>
+              {who_we_are_data.map((dataItem, index) => {
+                return (
+                  <Box className='box' key={index}>
+                    <img src={dataItem.icon} alt={dataItem.title} />
+                    <BoxTitle>{dataItem.title}</BoxTitle>
+                    <BoxDespText>{dataItem.desp}</BoxDespText>
+                  </Box>
+                );
+              })}
+            </BoxContainer>
+          </Section>
+        </Element>
+        <Element name='howItWorks'>
+          <Section>
+            <VideoBackground src={videoBgImg} alt={'video'} />
+            <VideoContainer className='video-player'>
+              <PlayerButton>
+                <img src={videoPlayerIcon} alt={'play'} />
+              </PlayerButton>
+            </VideoContainer>
+          </Section>
+        </Element>
 
-        <Section>
-          <VideoBackground src={videoBgImg} alt={'video'} />
-          <VideoContainer className='video-player'>
-            <PlayerButton>
-              <img src={videoPlayerIcon} alt={'play'} />
-            </PlayerButton>
-          </VideoContainer>
-        </Section>
-
-        <Section className='our_projects'>
-          <CaptionText>Our projects</CaptionText>
-          <BackgroundEllipse2 className='bg-ellipse2' />
-          <BackgroundEllipse3 className='bg-ellipse3' />
-          <Slider ref={slider => (sliderRef = slider)} {...sliderSettings} className='slider-container'>
-            <SliderItem>
-              <img src={slideImage1} alt={'slide1'} />
-            </SliderItem>
-            <SliderItem>
-              <img src={slideImage2} alt={'slide2'} />
-            </SliderItem>
-            <SliderItem>
-              <img src={slideImage3} alt={'slide3'} />
-            </SliderItem>
-            <SliderItem>
-              <img src={slideImage4} alt={'slide4'} />
-            </SliderItem>
-            <SliderItem>
-              <img src={slideImage5} alt={'slide5'} />
-            </SliderItem>
-            <SliderItem>
-              <img src={slideImage6} alt={'slide6'} />
-            </SliderItem>
-            <SliderItem>
-            </SliderItem>
-          </Slider>
-          <SlideNavigator>
-            <PrevButton onClick={() => sliderRef.slickPrev()}>
-              <img src={arrowIcon} alt={'prev'} />
-            </PrevButton>
-            <NextButton onClick={() => sliderRef.slickNext()}>
-              <img src={arrowIcon} alt={'next'} />
-            </NextButton>
-          </SlideNavigator>
-        </Section>
+        <Element name='projects'>
+          <Section className='our_projects'>
+            <CaptionText>Our projects</CaptionText>
+            <BackgroundEllipse2 className='bg-ellipse2' />
+            <BackgroundEllipse3 className='bg-ellipse3' />
+            <Slider ref={slider => (sliderRef = slider)} {...sliderSettings} className='slider-container'>
+              <SliderItem>
+                <img src={slideImage1} alt={'slide1'} />
+              </SliderItem>
+              <SliderItem>
+                <img src={slideImage2} alt={'slide2'} />
+              </SliderItem>
+              <SliderItem>
+                <img src={slideImage3} alt={'slide3'} />
+              </SliderItem>
+              {/* <SliderItem>
+                <img src={slideImage4} alt={'slide4'} />
+              </SliderItem>
+              <SliderItem>
+                <img src={slideImage5} alt={'slide5'} />
+              </SliderItem>
+              <SliderItem>
+                <img src={slideImage6} alt={'slide6'} />
+              </SliderItem>
+              <SliderItem>
+              </SliderItem> */}
+            </Slider>
+            <SlideNavigator>
+              <PrevButton onClick={() => sliderRef.slickPrev()}>
+                <img src={arrowIcon} alt={'prev'} />
+              </PrevButton>
+              <NextButton onClick={() => sliderRef.slickNext()}>
+                <img src={arrowIcon} alt={'next'} />
+              </NextButton>
+            </SlideNavigator>
+          </Section>
+        </Element>
 
         <Section className='customer_trust_us'>
           <CaptionText>Customer trust us.</CaptionText>
@@ -695,7 +765,6 @@ function Home() {
             })}
           </BoxContainer>
         </Section>
-
         <Section className='you_need_us'>
           <CaptionText alignLeft>You need us.</CaptionText>
           <BoxContainer className='box-container'>
@@ -710,31 +779,45 @@ function Home() {
           </BoxContainer>
         </Section>
 
-        <Section className='get_free'>
-          <FormContainerWrapper>
-            <MediumText>Got a project in mind?</MediumText>
-            <Row>
-              <CaptionText underline>Get free</CaptionText>
-              <CaptionText>expert advice</CaptionText>
-            </Row>
+        <Element name="contacts">
+          <Section className='get_free'>
+            <FormContainerWrapper>
+              <MediumText>Got a project in mind?</MediumText>
+              <Row>
+                <CaptionText underline>Get free</CaptionText>
+                <CaptionText>expert advice</CaptionText>
+              </Row>
 
-            <FormContainer>
-              <InputItemContainer>
-                <InputItem placeholder={'Username'} />
-                <InputItemIcon src={userIcon} alt={'user'} />
-              </InputItemContainer>
+              <FormContainer noValidate onSubmit={handleSubmit(onSubmit)}>
+                <InputItemContainer>
+                  <InputItem
+                    placeholder={'Name'}
+                    name="name"
+                    ref={register({
+                      required: true
+                    })}
+                  />
+                  <InputItemIcon src={userIcon} alt={'user'} />
+                </InputItemContainer>
 
-              <InputItemContainer>
-                <InputItem placeholder={'Skype/Whatsapp/E-mail'} />
-                <InputItemIcon src={emailIcon} alt={'email'} />
-              </InputItemContainer>
-              
-              <Button href='/lets_talk'>Let's talk</Button>
-            </FormContainer>
-          </FormContainerWrapper>
+                <InputItemContainer>
+                  <InputItem
+                    placeholder={'Skype/Whatsapp/E-mail'}
+                    name="contactNumber"
+                    ref={register({
+                      required: true
+                    })}
+                  />
+                  <InputItemIcon src={emailIcon} alt={'email'} />
+                </InputItemContainer>
 
-          <GetFreeFormBackground src={getFreeFormBgImg}></GetFreeFormBackground>
-        </Section>
+                <SendButton type="submit">Let's talk</SendButton>
+              </FormContainer>
+            </FormContainerWrapper>
+
+            <GetFreeFormBackground src={getFreeFormBgImg}></GetFreeFormBackground>
+          </Section>
+        </Element>
 
         <Section className='footer'>
           <img src={footerBgImg} alt={'footer'} />
@@ -751,6 +834,7 @@ function Home() {
           </LinksBox>
         </Section>
       </div>
+      </>)}
     </>
   );
 }
