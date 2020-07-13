@@ -4,7 +4,7 @@ import emailjs from 'emailjs-com';
 import styled from 'styled-components';
 
 const MainContainer = styled.div`
-  z-index: 1000;
+  z-index: 5;
 `;
 
 const LogoImgBox = styled.img`
@@ -17,6 +17,7 @@ const CrossIconBox = styled.div`
   position: absolute;
   top: 49px;
   right: 49px;
+  cursor: pointer;
 `;
 
 const ContentWrapper = styled.div`

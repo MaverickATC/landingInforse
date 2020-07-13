@@ -198,6 +198,7 @@ const Box = styled.div`
 `;
 
 const BoxTitle = styled.div`
+  font-family: 'Gotham Pro Bold';
   font-size: 20px;
   font-weight: bold;
   line-height: 83.7%;
@@ -757,7 +758,7 @@ function Home() {
                 <Box className='box' key={index}>
                   <BoxAvatarImg src={dataItem.avatar} alt={dataItem.name} />
                   <BoxNameText>{dataItem.name}</BoxNameText>
-                  <BoxRoleText>{dataItem.name}</BoxRoleText>
+                  <BoxRoleText>{dataItem.role}</BoxRoleText>
                   <BoxQuoteText>"</BoxQuoteText>
                   <BoxText>{dataItem.text}</BoxText>
                 </Box>
@@ -822,13 +823,13 @@ function Home() {
         <Section className='footer'>
           <img src={footerBgImg} alt={'footer'} />
           <LinksBox>
-            <Link href='/'>
+            <Link href="Skype:live:illia.kovtun.work?chat">
               <img src={skypeIcon} alt={'skype'} />
             </Link>
-            <Link href='/'>
+            <Link href="https://t.me/illia_kovtun">
               <img src={telegramIcon} alt={'telegram'} />
             </Link>
-            <Link href='/'>
+            <Link href="https://wa.me/380633945565">
               <img src={whatsappIcon} alt={'whatsapp'} />
             </Link>
           </LinksBox>

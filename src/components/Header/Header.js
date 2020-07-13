@@ -48,7 +48,7 @@ function Header(props) {
           to="about" 
           spy={true} 
           smooth={true} 
-          duration={500} 
+          duration={500}
         >About</LinkItem>
         <LinkItem 
           to="howItWorks" 
