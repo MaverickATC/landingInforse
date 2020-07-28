@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Element} from 'react-scroll';
 import styled from 'styled-components';
 import Slider from 'react-slick';
@@ -641,6 +641,9 @@ function Home() {
   //state to show modal
   const [modalShow, setModalShow] = useState(false);
   const [isPlay, setIsPlay] = useState(false);
+  const [videoH, setVideoH] = useState(600);
+  const [clientW, setClientW] = useState(document.body.clientWidth);
+  const [vStyle, setVStyle] = useState({marginBottom:''});
 
   const toggleModal = () => {
     const newState = !modalShow;
@@ -677,12 +680,17 @@ function Home() {
     });
   }
 
-  let videoH = 600;
-  const vStyle = {marginBottom: '0'}
+
+  useEffect(()=>{
+    clientW<600?setVideoH(200):setVideoH(600);
+    clientW<=768?setVStyle({marginBottom: ''}):setVStyle({marginBottom: '150px'});
+  },[clientW])
+
   const calcVideoHeight = () => {
     const w=document.body.clientWidth;
-    w<600?videoH=200:videoH=600;
-    w<=768?vStyle.marginBottom='0':vStyle.marginBottom='150px';
+    if(w!==clientW){
+      setClientW(w);
+    }
   }
 
   return (
