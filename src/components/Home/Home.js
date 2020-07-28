@@ -1,11 +1,17 @@
-import React, { useRef, useState } from 'react';
-import { Element } from 'react-scroll';
+import React, {useRef, useState} from 'react';
+import {Element} from 'react-scroll';
 import styled from 'styled-components';
 import Slider from 'react-slick';
-import { useForm } from 'react-hook-form'
+import {useForm} from 'react-hook-form'
 import emailjs from 'emailjs-com';
 import Header from '../Header/Header';
-import { Modal } from '../Modal/Modal';
+import {Modal} from '../Modal/Modal';
+import {Player, BigPlayButton} from 'video-react';
+
+//video styles
+import 'video-react/dist/video-react.css';
+//video
+import aboutVideo from './about.mp4';
 
 const BannerSection = styled.div`
   position: relative;
@@ -634,10 +640,15 @@ function Home() {
 
   //state to show modal
   const [modalShow, setModalShow] = useState(false);
+  const [isPlay, setIsPlay] = useState(false);
 
   const toggleModal = () => {
     const newState = !modalShow;
     setModalShow(newState);
+  }
+
+  const startPlay = () => {
+    setIsPlay(true);
   }
 
   //mail send
@@ -656,77 +667,100 @@ function Home() {
       });
   }
   // form validation
-  const { register, handleSubmit, reset } = useForm();
+  const {register, handleSubmit, reset} = useForm();
 
   const onSubmit = data => {
-    const inputData = { ...data };
+    const inputData = {...data};
     sendHandler(inputData.name, inputData.contactNumber)
     reset({
       touched: false
     });
   }
 
+  let videoH = 600;
+  const vStyle = {marginBottom: '0'}
+  const calcVideoHeight = () => {
+    const w=document.body.clientWidth;
+    w<600?videoH=200:videoH=600;
+    w<=768?vStyle.marginBottom='0':vStyle.marginBottom='150px';
+  }
+
   return (
     <>
-      {modalShow ? (<Modal show={modalShow} click={toggleModal}/>):
-      (<>
-      <Header click={toggleModal}/>
-      <div className='home'>
-        <BannerBackgroundImg src={bannerBgImg} alt={'banner'} />
-        <BannerSection>
-          <BannerContent>
-            <BannerTextBig>Nunc euismod facilisi volutpat, amet.</BannerTextBig>
-            <BannerTextNormal>Faucibus feugiat proin odio vel pharetra ullamcorper ultrices mauris, ut. Elementum.</BannerTextNormal>
-            <ModalButton onClick={toggleModal}>Let's talk</ModalButton>
-          </BannerContent>
+      {calcVideoHeight()}
+      {modalShow ? (<Modal show={modalShow} click={toggleModal}/>) :
+        (<>
+          <Header click={toggleModal}/>
+          <div className='home'>
+            <BannerBackgroundImg src={bannerBgImg} alt={'banner'}/>
+            <BannerSection>
+              <BannerContent>
+                <BannerTextBig>Nunc euismod facilisi volutpat, amet.</BannerTextBig>
+                <BannerTextNormal>Faucibus feugiat proin odio vel pharetra ullamcorper ultrices mauris, ut.
+                  Elementum.</BannerTextNormal>
+                <ModalButton onClick={toggleModal}>Let's talk</ModalButton>
+              </BannerContent>
 
-          <BannerPhoneImg1 src={bannerPhoneImg1} alt={'phone1'} />
-          <BannerPhoneImg2 src={bannerPhoneImg2} alt={'phone2'} />
-        </BannerSection>
+              <BannerPhoneImg1 src={bannerPhoneImg1} alt={'phone1'}/>
+              <BannerPhoneImg2 src={bannerPhoneImg2} alt={'phone2'}/>
+            </BannerSection>
 
-        <Element name='about'>
-          <Section className='who-we-are' id="1">
-            <CaptionText>Who we are.</CaptionText>
-            <BoxContainer className='who-we-are-content'>
-              {who_we_are_data.map((dataItem, index) => {
-                return (
-                  <Box className='box' key={index}>
-                    <img src={dataItem.icon} alt={dataItem.title} />
-                    <BoxTitle>{dataItem.title}</BoxTitle>
-                    <BoxDespText>{dataItem.desp}</BoxDespText>
-                  </Box>
-                );
-              })}
-            </BoxContainer>
-          </Section>
-        </Element>
-        <Element name='howItWorks'>
-          <Section>
-            <VideoBackground src={videoBgImg} alt={'video'} />
-            <VideoContainer className='video-player'>
-              <PlayerButton>
-                <img src={videoPlayerIcon} alt={'play'} />
-              </PlayerButton>
-            </VideoContainer>
-          </Section>
-        </Element>
+            <Element name='about'>
+              <Section className='who-we-are' id="1">
+                <CaptionText>Who we are.</CaptionText>
+                <BoxContainer className='who-we-are-content'>
+                  {who_we_are_data.map((dataItem, index) => {
+                    return (
+                      <Box className='box' key={index}>
+                        <img src={dataItem.icon} alt={dataItem.title}/>
+                        <BoxTitle>{dataItem.title}</BoxTitle>
+                        <BoxDespText>{dataItem.desp}</BoxDespText>
+                      </Box>
+                    );
+                  })}
+                </BoxContainer>
+              </Section>
+            </Element>
+            <Element name='howItWorks'>
+              <Section>
+                {
+                  !isPlay ?
+                    <>
+                      <VideoBackground src={videoBgImg} alt={'video'}/>
+                      <VideoContainer className='video-player'>
+                        <PlayerButton onClick={startPlay}>
+                          <img src={videoPlayerIcon} alt={'play'}/>
+                        </PlayerButton>
+                      </VideoContainer>
+                    </>
+                    :
+                    <div style={vStyle}>
 
-        <Element name='projects'>
-          <Section className='our_projects'>
-            <CaptionText>Our projects</CaptionText>
-            <BackgroundEllipse2 className='bg-ellipse2' />
-            <BackgroundEllipse3 className='bg-ellipse3' />
-            <Slider ref={slider => (sliderRef = slider)} {...sliderSettings} className='slider-container'>
-              <SliderItem>
-                <img src={slideImage1} alt={'slide1'} />
-              </SliderItem>
-              <SliderItem>
-                <img src={slideImage2} alt={'slide2'} />
-              </SliderItem>
-              <SliderItem>
-                <img src={slideImage3} alt={'slide3'} />
-              </SliderItem>
-              {/* <SliderItem>
+                      <Player preload="auto" autoPlay height={videoH} width={'100%'} fluid={false} playsInline={true}>
+                        <BigPlayButton position="center"/>
+                        <source src={aboutVideo}/>
+                      </Player>
+                    </div>
+                }
+              </Section>
+            </Element>
+
+            <Element name='projects'>
+              <Section className='our_projects'>
+                <CaptionText>Our projects</CaptionText>
+                <BackgroundEllipse2 className='bg-ellipse2'/>
+                <BackgroundEllipse3 className='bg-ellipse3'/>
+                <Slider ref={slider => (sliderRef = slider)} {...sliderSettings} className='slider-container'>
+                  <SliderItem>
+                    <img src={slideImage1} alt={'slide1'}/>
+                  </SliderItem>
+                  <SliderItem>
+                    <img src={slideImage2} alt={'slide2'}/>
+                  </SliderItem>
+                  <SliderItem>
+                    <img src={slideImage3} alt={'slide3'}/>
+                  </SliderItem>
+                  {/* <SliderItem>
                 <img src={slideImage4} alt={'slide4'} />
               </SliderItem>
               <SliderItem>
@@ -737,105 +771,105 @@ function Home() {
               </SliderItem>
               <SliderItem>
               </SliderItem> */}
-            </Slider>
-            <SlideNavigator>
-              <PrevButton onClick={() => sliderRef.slickPrev()}>
-                <img src={arrowIcon} alt={'prev'} />
-              </PrevButton>
-              <NextButton onClick={() => sliderRef.slickNext()}>
-                <img src={arrowIcon} alt={'next'} />
-              </NextButton>
-            </SlideNavigator>
-          </Section>
-        </Element>
+                </Slider>
+                <SlideNavigator>
+                  <PrevButton onClick={() => sliderRef.slickPrev()}>
+                    <img src={arrowIcon} alt={'prev'}/>
+                  </PrevButton>
+                  <NextButton onClick={() => sliderRef.slickNext()}>
+                    <img src={arrowIcon} alt={'next'}/>
+                  </NextButton>
+                </SlideNavigator>
+              </Section>
+            </Element>
 
-        <Section className='customer_trust_us'>
-          <CaptionText>Customer trust us.</CaptionText>
-          <BoxContainer className='box-container'>
-            <BackgroundEllipse4 className='bg-ellipse4' />
-            {customer_trust_us_data.map((dataItem, index) => {
-              return (
-                <Box className='box' key={index}>
-                  <BoxAvatarImg src={dataItem.avatar} alt={dataItem.name} />
-                  <BoxNameText>{dataItem.name}</BoxNameText>
-                  <BoxRoleText>{dataItem.role}</BoxRoleText>
-                  <BoxQuoteText>"</BoxQuoteText>
-                  <BoxText>{dataItem.text}</BoxText>
-                </Box>
-              );
-            })}
-          </BoxContainer>
-        </Section>
-        <Section className='you_need_us'>
-          <CaptionText alignLeft>You need us.</CaptionText>
-          <BoxContainer className='box-container'>
-            {you_need_us_data.map((dataItem, index) => {
-              return (
-                <Box className='box' key={index}>
-                  <img src={dataItem.icon} alt={dataItem.alt} />
-                  <BoxText className='box-text'>{dataItem.text}</BoxText>
-                </Box>
-              );
-            })}
-          </BoxContainer>
-        </Section>
+            <Section className='customer_trust_us'>
+              <CaptionText>Customer trust us.</CaptionText>
+              <BoxContainer className='box-container'>
+                <BackgroundEllipse4 className='bg-ellipse4'/>
+                {customer_trust_us_data.map((dataItem, index) => {
+                  return (
+                    <Box className='box' key={index}>
+                      <BoxAvatarImg src={dataItem.avatar} alt={dataItem.name}/>
+                      <BoxNameText>{dataItem.name}</BoxNameText>
+                      <BoxRoleText>{dataItem.role}</BoxRoleText>
+                      <BoxQuoteText>"</BoxQuoteText>
+                      <BoxText>{dataItem.text}</BoxText>
+                    </Box>
+                  );
+                })}
+              </BoxContainer>
+            </Section>
+            <Section className='you_need_us'>
+              <CaptionText alignLeft>You need us.</CaptionText>
+              <BoxContainer className='box-container'>
+                {you_need_us_data.map((dataItem, index) => {
+                  return (
+                    <Box className='box' key={index}>
+                      <img src={dataItem.icon} alt={dataItem.alt}/>
+                      <BoxText className='box-text'>{dataItem.text}</BoxText>
+                    </Box>
+                  );
+                })}
+              </BoxContainer>
+            </Section>
 
-        <Element name="contacts">
-          <Section className='get_free'>
-            <FormContainerWrapper>
-              <MediumText>Got a project in mind?</MediumText>
-              <Row>
-                <CaptionText underline>Get free</CaptionText>
-                <CaptionText>expert advice</CaptionText>
-              </Row>
+            <Element name="contacts">
+              <Section className='get_free'>
+                <FormContainerWrapper>
+                  <MediumText>Got a project in mind?</MediumText>
+                  <Row>
+                    <CaptionText underline>Get free</CaptionText>
+                    <CaptionText>expert advice</CaptionText>
+                  </Row>
 
-              <FormContainer noValidate onSubmit={handleSubmit(onSubmit)}>
-                <InputItemContainer>
-                  <InputItem
-                    placeholder={'Name'}
-                    name="name"
-                    ref={register({
-                      required: true
-                    })}
-                  />
-                  <InputItemIcon src={userIcon} alt={'user'} />
-                </InputItemContainer>
+                  <FormContainer noValidate onSubmit={handleSubmit(onSubmit)}>
+                    <InputItemContainer>
+                      <InputItem
+                        placeholder={'Name'}
+                        name="name"
+                        ref={register({
+                          required: true
+                        })}
+                      />
+                      <InputItemIcon src={userIcon} alt={'user'}/>
+                    </InputItemContainer>
 
-                <InputItemContainer>
-                  <InputItem
-                    placeholder={'Skype/Whatsapp/E-mail'}
-                    name="contactNumber"
-                    ref={register({
-                      required: true
-                    })}
-                  />
-                  <InputItemIcon src={emailIcon} alt={'email'} />
-                </InputItemContainer>
+                    <InputItemContainer>
+                      <InputItem
+                        placeholder={'Skype/Whatsapp/E-mail'}
+                        name="contactNumber"
+                        ref={register({
+                          required: true
+                        })}
+                      />
+                      <InputItemIcon src={emailIcon} alt={'email'}/>
+                    </InputItemContainer>
 
-                <SendButton type="submit">Let's talk</SendButton>
-              </FormContainer>
-            </FormContainerWrapper>
+                    <SendButton type="submit">Let's talk</SendButton>
+                  </FormContainer>
+                </FormContainerWrapper>
 
-            <GetFreeFormBackground src={getFreeFormBgImg}></GetFreeFormBackground>
-          </Section>
-        </Element>
+                <GetFreeFormBackground src={getFreeFormBgImg}></GetFreeFormBackground>
+              </Section>
+            </Element>
 
-        <Section className='footer'>
-          <img src={footerBgImg} alt={'footer'} />
-          <LinksBox>
-            <Link href="Skype:live:illia.kovtun.work?chat">
-              <img src={skypeIcon} alt={'skype'} />
-            </Link>
-            <Link href="https://t.me/illia_kovtun">
-              <img src={telegramIcon} alt={'telegram'} />
-            </Link>
-            <Link href="https://wa.me/380633945565">
-              <img src={whatsappIcon} alt={'whatsapp'} />
-            </Link>
-          </LinksBox>
-        </Section>
-      </div>
-      </>)}
+            <Section className='footer'>
+              <img src={footerBgImg} alt={'footer'}/>
+              <LinksBox>
+                <Link href="Skype:live:illia.kovtun.work?chat">
+                  <img src={skypeIcon} alt={'skype'}/>
+                </Link>
+                <Link href="https://t.me/illia_kovtun">
+                  <img src={telegramIcon} alt={'telegram'}/>
+                </Link>
+                <Link href="https://wa.me/380633945565">
+                  <img src={whatsappIcon} alt={'whatsapp'}/>
+                </Link>
+              </LinksBox>
+            </Section>
+          </div>
+        </>)}
     </>
   );
 }
