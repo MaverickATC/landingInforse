@@ -661,7 +661,7 @@ function Home() {
       "contact": contactNumber
     }
 
-    emailjs.send('default_service', 'template_JuSrrHAw', templateParams, 'user_HuJgJTYaS22UkmTiUftN0')
+    emailjs.send('gmail', 'frominforcelanding', templateParams, 'user_gqtUKnxAbxZgG5G1ordAY')
       .then(function (response) {
         console.log('SUCCESS!', response.status, response.text);
         alert('Your message sent')

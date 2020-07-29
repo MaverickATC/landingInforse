@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, {useState} from 'react';
+import {useForm} from 'react-hook-form';
 import emailjs from 'emailjs-com';
 import styled from 'styled-components';
 
@@ -158,78 +158,79 @@ const userIcon = require('../../assets/images/icon_user_black.svg');
 const emailIcon = require('../../assets/images/icon_email_black.svg');
 
 function LetsTalk(props) {
-  const [isSuccessful, setIsSuccessful] = useState(false);
+    const [isSuccessful, setIsSuccessful] = useState(false);
 
-  //mail send
-  const sendHandler = (name, contactNumber) => {
-    const templateParams = {
-      "name": name,
-      "contact": contactNumber
+    //mail send
+    const sendHandler = (name, contactNumber) => {
+        const templateParams = {
+            "name": name,
+            "contact": contactNumber
+        }
+
+        emailjs.send('gmail', 'frominforcelanding', templateParams, 'user_gqtUKnxAbxZgG5G1ordAY')
+            .then(function (response) {
+                console.log('SUCCESS!', response.status, response.text);
+                setIsSuccessful(true);
+            }, function (error) {
+                console.log('FAILED...', error);
+                alert("Message was not sent, try again");
+            });
+    }
+    // form validation
+    const {register, handleSubmit, reset} = useForm();
+
+    const onSubmit = data => {
+        const inputData = {...data};
+        sendHandler(inputData.name, inputData.contactNumber)
+        reset({
+            touched: false
+        });
     }
 
-    emailjs.send('default_service', 'template_JuSrrHAw', templateParams, 'user_HuJgJTYaS22UkmTiUftN0')
-      .then(function (response) {
-        console.log('SUCCESS!', response.status, response.text);
-        setIsSuccessful(true);
-      }, function (error) {
-        console.log('FAILED...', error);
-      });
-  }
-  // form validation
-  const { register, handleSubmit, reset } = useForm();
+    return (
+        <MainContainer className='lets_talk_page'>
+            <LogoImgBox src={LogoImg} alt={'logo'}/>
+            <CrossIconBox onClick={props.click}>
+                <img src={crossIcon} alt={'cross'}/>
+            </CrossIconBox>
 
-  const onSubmit = data => {
-    const inputData = { ...data };
-    sendHandler(inputData.name, inputData.contactNumber)
-    reset({
-      touched: false
-    });
-  }
+            <ContentWrapper>
+                {!isSuccessful ?
+                    (<FormContainerWrapper style={{marginTop: '3rem'}}>
+                        <MediumTextBox>Got a project in mind?</MediumTextBox>
+                        <BigTextBox>Get free expert advice</BigTextBox>
 
-  return (
-    <MainContainer className='lets_talk_page'>
-      <LogoImgBox src={LogoImg} alt={'logo'} />
-      <CrossIconBox onClick={props.click} >
-        <img src={crossIcon} alt={'cross'} />
-      </CrossIconBox>
+                        <FormContainer noValidate onSubmit={handleSubmit(onSubmit)}>
+                            <InputItemContainer>
+                                <InputItem
+                                    placeholder={'Name'}
+                                    name="name"
+                                    ref={register({
+                                        required: true
+                                    })}
+                                />
+                                <InputItemIcon src={userIcon} alt={'user'}/>
+                            </InputItemContainer>
 
-      <ContentWrapper>
-        {!isSuccessful ?
-          (<FormContainerWrapper style={{marginTop: '3rem'}}>
-            <MediumTextBox>Got a project in mind?</MediumTextBox>
-            <BigTextBox>Get free expert advice</BigTextBox>
+                            <InputItemContainer>
+                                <InputItem
+                                    placeholder={'Skype/Whatsapp/E-mail'}
+                                    name="contactNumber"
+                                    ref={register({
+                                        required: true
+                                    })}
+                                />
+                                <InputItemIcon src={emailIcon} alt={'email'}/>
+                            </InputItemContainer>
 
-            <FormContainer noValidate onSubmit={handleSubmit(onSubmit)}>
-              <InputItemContainer>
-                <InputItem
-                  placeholder={'Name'}
-                  name="name"
-                  ref={register({
-                    required: true
-                  })}
-                />
-                <InputItemIcon src={userIcon} alt={'user'} />
-              </InputItemContainer>
-
-              <InputItemContainer>
-                <InputItem
-                  placeholder={'Skype/Whatsapp/E-mail'}
-                  name="contactNumber"
-                  ref={register({
-                    required: true
-                  })}
-                />
-                <InputItemIcon src={emailIcon} alt={'email'} />
-              </InputItemContainer>
-
-              <Button type="submit">Let's talk</Button>
-            </FormContainer>
-          </FormContainerWrapper>) : (
-            <BigTextBox underline style={{ width: 566 }}>We are going to contact you very soon.</BigTextBox>
-          )}
-      </ContentWrapper>
-    </MainContainer>
-  );
+                            <Button type="submit">Let's talk</Button>
+                        </FormContainer>
+                    </FormContainerWrapper>) : (
+                        <BigTextBox underline style={{width: 566}}>We are going to contact you very soon.</BigTextBox>
+                    )}
+            </ContentWrapper>
+        </MainContainer>
+    );
 }
 
 export default LetsTalk;
